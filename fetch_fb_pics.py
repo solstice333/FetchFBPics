@@ -74,12 +74,19 @@ def main():
          '5A937038. Downloads all photos by default')
    parser.add_argument('-p', '--print-ids', action='store_true',
       help='just print uids')
+   parser.add_argument('-l', '--length', action='store_true',
+      help='print the number of urls found')
    args = parser.parse_args()
 
    with URLFileParser(args.URL_FILE) as urp:
       start_capture = False
+      urls = urp.get_urls()
 
-      for url in urp.get_urls():
+      if args.length:
+         print(len(urls))
+         exit(0)
+
+      for url in urls:
          dl = Downloadable(url)
 
          if args.print_ids:
@@ -97,6 +104,8 @@ def main():
                   break
                except urllib.error.URLError as err:
                   print(err.reason)
+               except ConnectionResetError as err:
+                  print(err.strerror)
             print("done!")
 
 if __name__ == '__main__':
