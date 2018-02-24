@@ -5,6 +5,7 @@ import re
 import argparse
 import os.path
 import ssl
+import http.client
 
 
 class URLFileParser:
@@ -79,6 +80,7 @@ def main():
    args = parser.parse_args()
 
    with URLFileParser(args.URL_FILE) as urp:
+      max_tries = 10
       start_capture = False
       urls = urp.get_urls()
 
@@ -98,7 +100,7 @@ def main():
 
          if start_capture:  
             print("downloading {}...".format(dl.default_filename), end='')
-            while True:
+            for i in range(0, max_tries):
                try:
                   dl.download(args.dst)
                   break
@@ -106,6 +108,8 @@ def main():
                   print(err.reason)
                except ConnectionResetError as err:
                   print(err.strerror)
+               except http.client.HTTPException as err:
+                  print(err)
             print("done!")
 
 if __name__ == '__main__':
